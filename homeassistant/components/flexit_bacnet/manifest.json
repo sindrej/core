@@ -1,13 +1,23 @@
 {
   "domain": "flexit_bacnet",
   "name": "Flexit Nordic (BACnet)",
-  "categories": ["climate.fans_ventilation"],
-  "codeowners": ["@lellky", "@piotrbulinski"],
+  "categories": [
+    "climate.fans_ventilation"
+  ],
+  "codeowners": [
+    "@lellky",
+    "@piotrbulinski"
+  ],
   "config_flow": true,
-  "connectivity": ["network"],
+  "connectivity": [
+    "network"
+  ],
   "documentation": "https://www.home-assistant.io/integrations/flexit_bacnet",
   "integration_type": "device",
   "iot_class": "local_polling",
   "quality_scale": "silver",
-  "requirements": ["flexit_bacnet==2.3.2"]
+  "requirements": [
+    "flexit_bacnet @ https://github.com/sindrej/flexit_bacnet/archive/cfca2aff68586c25f344e215851b90471b4b866f.zip"
+  ],
+  "version": "2026.11.14"
 }
