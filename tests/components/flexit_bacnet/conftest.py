@@ -3,7 +3,7 @@
 from collections.abc import Generator
 from unittest.mock import AsyncMock, patch
 
-from flexit_bacnet import FlexitBACnet
+from flexit_bacnet import FlexitBACnet, Unit
 import pytest
 from pytest_homeassistant.common import MockConfigEntry
 
@@ -45,6 +45,7 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.device_name = "Device Name"
         flexit_bacnet.model = "S4 RER"
         flexit_bacnet.product_line = "Nordic"
+        flexit_bacnet.fan_setpoint_unit = Unit.PERCENT
         flexit_bacnet.room_temperature = 19.0
         flexit_bacnet.air_temp_setpoint_away = 18.0
         flexit_bacnet.air_temp_setpoint_home = 22.0
@@ -81,6 +82,16 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.dhw_state = None
         flexit_bacnet.heat_pump_state = None
         flexit_bacnet.space_heating_setpoint = None
+        flexit_bacnet.supply_air_flow = None
+        flexit_bacnet.extract_air_flow = None
+        flexit_bacnet.air_flow_min = None
+        flexit_bacnet.air_flow_nominal = None
+        flexit_bacnet.heat_pump_flow_temperature = None
+        flexit_bacnet.heat_pump_return_temperature = None
+        flexit_bacnet.heat_pump_compressor_speed = None
+        flexit_bacnet.space_heating_flow_temperature = None
+        flexit_bacnet.space_heating_return_temperature = None
+        flexit_bacnet.space_heating_flow_temperature_setpoint = None
 
         # Mock fan setpoints
         flexit_bacnet.fan_setpoint_extract_air_fire = 56
@@ -109,6 +120,31 @@ def mock_flexit_bacnet_econordic(mock_flexit_bacnet: AsyncMock) -> AsyncMock:
     mock_flexit_bacnet.dhw_state = 1  # Comfort
     mock_flexit_bacnet.heat_pump_state = 4  # Normal operation
     mock_flexit_bacnet.space_heating_setpoint = 22.0
+    mock_flexit_bacnet.fireplace_mode_runtime = None
+
+    # flow-controlled fans: setpoints and limits in m³/h
+    mock_flexit_bacnet.fan_setpoint_unit = Unit.CUBIC_METERS_PER_HOUR
+    mock_flexit_bacnet.air_flow_min = 80.0
+    mock_flexit_bacnet.air_flow_nominal = 400.0
+    mock_flexit_bacnet.fan_setpoint_supply_air_away = 110
+    mock_flexit_bacnet.fan_setpoint_extract_air_away = 120
+    mock_flexit_bacnet.fan_setpoint_supply_air_home = 210
+    mock_flexit_bacnet.fan_setpoint_extract_air_home = 225
+    mock_flexit_bacnet.fan_setpoint_supply_air_high = 350
+    mock_flexit_bacnet.fan_setpoint_extract_air_high = 350
+    mock_flexit_bacnet.fan_setpoint_supply_air_fire = 350
+    mock_flexit_bacnet.fan_setpoint_extract_air_fire = 130
+    mock_flexit_bacnet.fan_setpoint_supply_air_cooker = 350
+    mock_flexit_bacnet.fan_setpoint_extract_air_cooker = 130
+    mock_flexit_bacnet.supply_air_flow = 221.4
+    mock_flexit_bacnet.extract_air_flow = 241.6
+
+    mock_flexit_bacnet.heat_pump_flow_temperature = 41.1
+    mock_flexit_bacnet.heat_pump_return_temperature = 30.0
+    mock_flexit_bacnet.heat_pump_compressor_speed = 35.0
+    mock_flexit_bacnet.space_heating_flow_temperature = 33.3
+    mock_flexit_bacnet.space_heating_return_temperature = 28.3
+    mock_flexit_bacnet.space_heating_flow_temperature_setpoint = 32.4
     return mock_flexit_bacnet
 
 

@@ -207,3 +207,26 @@ async def test_space_heating_setpoint_not_on_nordic(
     assert not entity_registry.async_get_entity_id(
         Platform.NUMBER, DOMAIN, "0000-0001-space_heating_setpoint"
     )
+
+
+async def test_econordic_numbers(
+    hass: HomeAssistant,
+    snapshot: SnapshotAssertion,
+    entity_registry: er.EntityRegistry,
+    mock_flexit_bacnet_econordic: AsyncMock,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """Test fan setpoints of flow-controlled units are air flows within the unit's range."""
+
+    await setup_with_selected_platforms(hass, mock_config_entry, [Platform.NUMBER])
+
+    await snapshot_platform(hass, entity_registry, snapshot, mock_config_entry.entry_id)
+
+    cooker = hass.states.get("number.device_name_cooker_hood_supply_fan_setpoint")
+    assert cooker.state == "350"
+    assert cooker.attributes["unit_of_measurement"] == "m³/h"
+    assert cooker.attributes["min"] == 80.0
+    assert cooker.attributes["max"] == 400.0
+    assert not entity_registry.async_get_entity_id(
+        Platform.NUMBER, DOMAIN, "0000-0001-fireplace_mode_runtime"
+    )

@@ -2,10 +2,10 @@
 
 import asyncio.exceptions
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import override
 
-from flexit_bacnet import FlexitBACnet
+from flexit_bacnet import FlexitBACnet, Unit
 from flexit_bacnet.bacnet import DecodingError
 
 from homeassistant.components.number import (
@@ -14,7 +14,12 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import PERCENTAGE, UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfTemperature,
+    UnitOfTime,
+    UnitOfVolumeFlowRate,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -26,6 +31,21 @@ from .entity import FlexitEntity
 _MAX_FAN_SETPOINT = 100
 _MIN_FAN_SETPOINT = 30
 
+
+def _fan_setpoint_min(device: FlexitBACnet) -> float | None:
+    """Return the lowest fan setpoint: 30 % or the unit's minimum air flow."""
+    if device.fan_setpoint_unit is Unit.PERCENT:
+        return _MIN_FAN_SETPOINT
+    return device.air_flow_min
+
+
+def _fan_setpoint_max(device: FlexitBACnet) -> float | None:
+    """Return the highest fan setpoint: 100 % or the unit's nominal air flow."""
+    if device.fan_setpoint_unit is Unit.PERCENT:
+        return _MAX_FAN_SETPOINT
+    return device.air_flow_nominal
+
+
 _MAX_RUNTIME_DURATION = 360
 _MIN_RUNTIME_DURATION = 1
 
@@ -35,8 +55,8 @@ class FlexitNumberEntityDescription(NumberEntityDescription):
     """Describes a Flexit number entity."""
 
     native_value_fn: Callable[[FlexitBACnet], float | None]
-    native_max_value_fn: Callable[[FlexitBACnet], int | None]
-    native_min_value_fn: Callable[[FlexitBACnet], int | None]
+    native_max_value_fn: Callable[[FlexitBACnet], float | None]
+    native_min_value_fn: Callable[[FlexitBACnet], float | None]
     set_native_value_fn: Callable[[FlexitBACnet, float], Awaitable[None]]
     exists_fn: Callable[[FlexitBACnet], bool] = lambda _: True
 
@@ -58,6 +78,9 @@ class FlexitNumberEntityDescription(NumberEntityDescription):
 # | COOKER_HOOD | Extract  | 30                    | 100                   |
 # | FIREPLACE   | Supply   | 30                    | 100                   |
 # | FIREPLACE   | Extract  | 30                    | 100                   |
+#
+# On flow-controlled units (EcoNordic) the setpoints are air flows in m³/h, and
+# 30 and 100 are replaced by the unit's minimum and nominal air flow.
 
 
 NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
@@ -73,7 +96,7 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
         ),
         native_unit_of_measurement=PERCENTAGE,
         native_max_value_fn=lambda device: device.fan_setpoint_extract_air_home,
-        native_min_value_fn=lambda _: _MIN_FAN_SETPOINT,
+        native_min_value_fn=_fan_setpoint_min,
     ),
     FlexitNumberEntityDescription(
         key="away_supply_fan_setpoint",
@@ -87,7 +110,7 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
         ),
         native_unit_of_measurement=PERCENTAGE,
         native_max_value_fn=lambda device: device.fan_setpoint_supply_air_home,
-        native_min_value_fn=lambda _: _MIN_FAN_SETPOINT,
+        native_min_value_fn=_fan_setpoint_min,
     ),
     FlexitNumberEntityDescription(
         key="cooker_hood_extract_fan_setpoint",
@@ -100,8 +123,8 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_extract_air_cooker(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
-        native_min_value_fn=lambda _: _MIN_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
+        native_min_value_fn=_fan_setpoint_min,
     ),
     FlexitNumberEntityDescription(
         key="cooker_hood_supply_fan_setpoint",
@@ -114,8 +137,8 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_supply_air_cooker(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
-        native_min_value_fn=lambda _: _MIN_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
+        native_min_value_fn=_fan_setpoint_min,
     ),
     FlexitNumberEntityDescription(
         key="fireplace_extract_fan_setpoint",
@@ -128,8 +151,8 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_extract_air_fire(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
-        native_min_value_fn=lambda _: _MIN_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
+        native_min_value_fn=_fan_setpoint_min,
     ),
     FlexitNumberEntityDescription(
         key="fireplace_supply_fan_setpoint",
@@ -142,8 +165,8 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_supply_air_fire(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
-        native_min_value_fn=lambda _: _MIN_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
+        native_min_value_fn=_fan_setpoint_min,
     ),
     FlexitNumberEntityDescription(
         key="high_extract_fan_setpoint",
@@ -156,7 +179,7 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_extract_air_high(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
         native_min_value_fn=lambda device: device.fan_setpoint_extract_air_home,
     ),
     FlexitNumberEntityDescription(
@@ -170,7 +193,7 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_supply_air_high(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
         native_min_value_fn=lambda device: device.fan_setpoint_supply_air_home,
     ),
     FlexitNumberEntityDescription(
@@ -184,7 +207,7 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_extract_air_home(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
         native_min_value_fn=lambda device: device.fan_setpoint_extract_air_away,
     ),
     FlexitNumberEntityDescription(
@@ -198,7 +221,7 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
             device.set_fan_setpoint_supply_air_home(int(value))
         ),
         native_unit_of_measurement=PERCENTAGE,
-        native_max_value_fn=lambda _: _MAX_FAN_SETPOINT,
+        native_max_value_fn=_fan_setpoint_max,
         native_min_value_fn=lambda device: device.fan_setpoint_supply_air_away,
     ),
     FlexitNumberEntityDescription(
@@ -214,6 +237,8 @@ NUMBERS: tuple[FlexitNumberEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.MINUTES,
         native_max_value_fn=lambda _: _MAX_RUNTIME_DURATION,
         native_min_value_fn=lambda _: _MIN_RUNTIME_DURATION,
+        # read-only and not reported on EcoNordic units
+        exists_fn=lambda device: device.fireplace_mode_runtime is not None,
     ),
     FlexitNumberEntityDescription(
         key="space_heating_setpoint",
@@ -240,10 +265,23 @@ async def async_setup_entry(
 ) -> None:
     """Set up Flexit (bacnet) number from a config entry."""
     coordinator = config_entry.runtime_data
+    descriptions = NUMBERS
+    # flow-controlled units take fan setpoints as air flows instead of percentages
+    if coordinator.data.fan_setpoint_unit is Unit.CUBIC_METERS_PER_HOUR:
+        descriptions = tuple(
+            replace(
+                description,
+                device_class=NumberDeviceClass.VOLUME_FLOW_RATE,
+                native_unit_of_measurement=UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+            )
+            if description.native_unit_of_measurement == PERCENTAGE
+            else description
+            for description in NUMBERS
+        )
 
     async_add_entities(
         FlexitNumber(coordinator, description)
-        for description in NUMBERS
+        for description in descriptions
         if description.exists_fn(coordinator.data)
     )
 

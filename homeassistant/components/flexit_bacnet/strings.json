@@ -116,6 +116,9 @@
       "exhaust_air_temperature": {
         "name": "Exhaust air temperature"
       },
+      "extract_air_flow": {
+        "name": "Extract air flow"
+      },
       "extract_air_humidity": {
         "name": "Extract air humidity"
       },
@@ -130,6 +133,15 @@
       },
       "heat_exchanger_speed": {
         "name": "Heat exchanger speed"
+      },
+      "heat_pump_compressor_speed": {
+        "name": "Heat pump compressor speed"
+      },
+      "heat_pump_flow_temperature": {
+        "name": "Heat pump flow temperature"
+      },
+      "heat_pump_return_temperature": {
+        "name": "Heat pump return temperature"
       },
       "heat_pump_state": {
         "name": "Heat pump state",
@@ -155,11 +167,23 @@
       "room_temperature": {
         "name": "Room temperature"
       },
+      "space_heating_flow_temperature": {
+        "name": "Space heating flow temperature"
+      },
+      "space_heating_flow_temperature_setpoint": {
+        "name": "Space heating flow temperature setpoint"
+      },
+      "space_heating_return_temperature": {
+        "name": "Space heating return temperature"
+      },
       "supply_air_fan_control_signal": {
         "name": "Supply air fan control signal"
       },
       "supply_air_fan_rpm": {
         "name": "Supply air fan"
+      },
+      "supply_air_flow": {
+        "name": "Supply air flow"
       },
       "supply_air_temperature": {
         "name": "Supply air temperature"
