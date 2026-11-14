@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import override
 
-from flexit_bacnet import FlexitBACnet
+from flexit_bacnet import FlexitBACnet, econordic
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -31,8 +31,32 @@ from .entity import FlexitEntity
 class FlexitSensorEntityDescription(SensorEntityDescription):
     """Describes a Flexit sensor entity."""
 
-    value_fn: Callable[[FlexitBACnet], float | None]
+    value_fn: Callable[[FlexitBACnet], StateType]
     exists_fn: Callable[[FlexitBACnet], bool] = lambda _: True
+
+
+HEAT_PUMP_STATES: dict[int | None, str] = {
+    econordic.HEAT_PUMP_STATE_STANDBY: "standby",
+    econordic.HEAT_PUMP_STATE_AIR_PURGE_PROCESS: "air_purge",
+    econordic.HEAT_PUMP_STATE_STARTUP_PROCESS: "starting",
+    econordic.HEAT_PUMP_STATE_NORMAL_OPERATION: "running",
+    econordic.HEAT_PUMP_STATE_STOP_PROCESS: "stopping",
+    econordic.HEAT_PUMP_STATE_DEFROST_OPERATION: "defrosting",
+    econordic.HEAT_PUMP_STATE_STANDBY_WHEN_ERROR: "error",
+    econordic.HEAT_PUMP_STATE_MANUAL_OPERATION: "manual",
+    econordic.HEAT_PUMP_STATE_FORCED_FAN_OPERATION: "forced_fan",
+    econordic.HEAT_PUMP_STATE_FORCED_PUMP_OPERATION: "forced_pump",
+}
+
+DHW_STATES: dict[int | None, str] = {
+    econordic.DHW_STATE_COMFORT: "comfort",
+    econordic.DHW_STATE_ECONOMY: "economy",
+    econordic.DHW_STATE_BOOST: "boost",
+    econordic.DHW_STATE_TEMPORARY_BOOST: "temporary_boost",
+    econordic.DHW_STATE_FORCED_CHARGE: "forced_charge",
+    econordic.DHW_STATE_ECONOMY_DELAY: "economy_delay",
+    econordic.DHW_STATE_LEGIONELLA_PREVENTION: "legionella_prevention",
+}
 
 
 SENSOR_TYPES: tuple[FlexitSensorEntityDescription, ...] = (
@@ -163,6 +187,57 @@ SENSOR_TYPES: tuple[FlexitSensorEntityDescription, ...] = (
         native_unit_of_measurement=PERCENTAGE,
         translation_key="heat_exchanger_speed",
         value_fn=lambda data: data.heat_exchanger_speed,
+    ),
+    FlexitSensorEntityDescription(
+        key="dhw_tank_temperature_top",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        translation_key="dhw_tank_temperature_top",
+        value_fn=lambda data: data.dhw_tank_temperature_top,
+        exists_fn=lambda data: data.dhw_tank_temperature_top is not None,
+    ),
+    FlexitSensorEntityDescription(
+        key="dhw_tank_temperature_middle",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        translation_key="dhw_tank_temperature_middle",
+        value_fn=lambda data: data.dhw_tank_temperature_middle,
+        exists_fn=lambda data: data.dhw_tank_temperature_middle is not None,
+    ),
+    FlexitSensorEntityDescription(
+        key="dhw_tank_temperature_bottom",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        translation_key="dhw_tank_temperature_bottom",
+        value_fn=lambda data: data.dhw_tank_temperature_bottom,
+        exists_fn=lambda data: data.dhw_tank_temperature_bottom is not None,
+    ),
+    FlexitSensorEntityDescription(
+        key="dhw_electric_heater_status",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=PERCENTAGE,
+        translation_key="dhw_electric_heater_status",
+        value_fn=lambda data: data.dhw_electric_heater_status,
+        exists_fn=lambda data: data.dhw_electric_heater_status is not None,
+    ),
+    FlexitSensorEntityDescription(
+        key="dhw_state",
+        device_class=SensorDeviceClass.ENUM,
+        options=list(DHW_STATES.values()),
+        translation_key="dhw_state",
+        value_fn=lambda data: DHW_STATES.get(data.dhw_state),
+        exists_fn=lambda data: data.dhw_state is not None,
+    ),
+    FlexitSensorEntityDescription(
+        key="heat_pump_state",
+        device_class=SensorDeviceClass.ENUM,
+        options=list(HEAT_PUMP_STATES.values()),
+        translation_key="heat_pump_state",
+        value_fn=lambda data: HEAT_PUMP_STATES.get(data.heat_pump_state),
+        exists_fn=lambda data: data.heat_pump_state is not None,
     ),
 )
 

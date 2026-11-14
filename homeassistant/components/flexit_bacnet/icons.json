@@ -45,6 +45,20 @@
       },
       "home_supply_fan_setpoint": {
         "default": "mdi:fan-plus"
+      },
+      "space_heating_setpoint": {
+        "default": "mdi:heating-coil"
+      }
+    },
+    "sensor": {
+      "dhw_electric_heater_status": {
+        "default": "mdi:water-boiler"
+      },
+      "dhw_state": {
+        "default": "mdi:water-boiler"
+      },
+      "heat_pump_state": {
+        "default": "mdi:heat-pump"
       }
     },
     "switch": {

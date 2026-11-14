@@ -44,6 +44,7 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.serial_number = "0000-0001"
         flexit_bacnet.device_name = "Device Name"
         flexit_bacnet.model = "S4 RER"
+        flexit_bacnet.product_line = "Nordic"
         flexit_bacnet.room_temperature = 19.0
         flexit_bacnet.air_temp_setpoint_away = 18.0
         flexit_bacnet.air_temp_setpoint_home = 22.0
@@ -72,6 +73,15 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.fireplace_ventilation_status = False
         flexit_bacnet.cooker_hood_status = False
 
+        # EcoNordic-only values are None on Nordic units
+        flexit_bacnet.dhw_tank_temperature_top = None
+        flexit_bacnet.dhw_tank_temperature_middle = None
+        flexit_bacnet.dhw_tank_temperature_bottom = None
+        flexit_bacnet.dhw_electric_heater_status = None
+        flexit_bacnet.dhw_state = None
+        flexit_bacnet.heat_pump_state = None
+        flexit_bacnet.space_heating_setpoint = None
+
         # Mock fan setpoints
         flexit_bacnet.fan_setpoint_extract_air_fire = 56
         flexit_bacnet.fan_setpoint_supply_air_fire = 77
@@ -85,6 +95,21 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.fan_setpoint_supply_air_cooker = 70
 
         yield flexit_bacnet
+
+
+@pytest.fixture
+def mock_flexit_bacnet_econordic(mock_flexit_bacnet: AsyncMock) -> AsyncMock:
+    """Mock data from an EcoNordic WH4 unit."""
+    mock_flexit_bacnet.model = "WH4"
+    mock_flexit_bacnet.product_line = "EcoNordic"
+    mock_flexit_bacnet.dhw_tank_temperature_top = 61.7
+    mock_flexit_bacnet.dhw_tank_temperature_middle = 58.3
+    mock_flexit_bacnet.dhw_tank_temperature_bottom = 50.6
+    mock_flexit_bacnet.dhw_electric_heater_status = 0
+    mock_flexit_bacnet.dhw_state = 1  # Comfort
+    mock_flexit_bacnet.heat_pump_state = 4  # Normal operation
+    mock_flexit_bacnet.space_heating_setpoint = 22.0
+    return mock_flexit_bacnet
 
 
 @pytest.fixture

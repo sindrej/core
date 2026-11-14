@@ -71,11 +71,38 @@
       },
       "home_supply_fan_setpoint": {
         "name": "Home supply fan setpoint"
+      },
+      "space_heating_setpoint": {
+        "name": "Space heating setpoint"
       }
     },
     "sensor": {
       "air_filter_operating_time": {
         "name": "Air filter operating time"
+      },
+      "dhw_electric_heater_status": {
+        "name": "Hot water electric heater"
+      },
+      "dhw_state": {
+        "name": "Hot water state",
+        "state": {
+          "comfort": "Comfort",
+          "economy": "Economy",
+          "boost": "Boost",
+          "temporary_boost": "Temporary boost",
+          "forced_charge": "Forced charge",
+          "economy_delay": "Economy delay",
+          "legionella_prevention": "Legionella prevention"
+        }
+      },
+      "dhw_tank_temperature_bottom": {
+        "name": "Hot water tank bottom temperature"
+      },
+      "dhw_tank_temperature_middle": {
+        "name": "Hot water tank middle temperature"
+      },
+      "dhw_tank_temperature_top": {
+        "name": "Hot water tank top temperature"
       },
       "electric_heater_power": {
         "name": "Electric heater power"
@@ -103,6 +130,21 @@
       },
       "heat_exchanger_speed": {
         "name": "Heat exchanger speed"
+      },
+      "heat_pump_state": {
+        "name": "Heat pump state",
+        "state": {
+          "standby": "[%key:common::state::standby%]",
+          "air_purge": "Air purge",
+          "starting": "Starting",
+          "running": "Running",
+          "stopping": "Stopping",
+          "defrosting": "Defrosting",
+          "error": "[%key:common::state::error%]",
+          "manual": "[%key:common::state::manual%]",
+          "forced_fan": "Forced fan",
+          "forced_pump": "Forced pump"
+        }
       },
       "outside_air_temperature": {
         "name": "Outside air temperature"

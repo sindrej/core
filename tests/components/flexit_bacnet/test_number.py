@@ -13,6 +13,7 @@ from pytest_homeassistant.common import (
 )
 from syrupy.assertion import SnapshotAssertion
 
+from homeassistant.components.flexit_bacnet.const import DOMAIN
 from homeassistant.components.number import (
     DOMAIN as NUMBER_DOMAIN,
     NumberService,
@@ -161,3 +162,48 @@ async def test_missing_number_property(
     await hass.async_block_till_done()
 
     assert hass.states.get(entity_id).state != STATE_UNAVAILABLE
+
+
+async def test_space_heating_setpoint(
+    hass: HomeAssistant,
+    entity_registry: er.EntityRegistry,
+    mock_flexit_bacnet_econordic: AsyncMock,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """Test the space heating setpoint of an EcoNordic unit keeps half degrees."""
+    entity_id = "number.device_name_space_heating_setpoint"
+
+    await setup_with_selected_platforms(hass, mock_config_entry, [Platform.NUMBER])
+
+    assert hass.states.get(entity_id).state == "22.0"
+
+    mock_flexit_bacnet_econordic.space_heating_setpoint = 21.5
+    await hass.services.async_call(
+        NUMBER_DOMAIN,
+        NumberService.SET_VALUE,
+        {
+            CommonServiceArgument.ENTITY_ID: entity_id,
+            NumberServiceArgument.VALUE: 21.5,
+        },
+        blocking=True,
+    )
+
+    mock_flexit_bacnet_econordic.set_space_heating_setpoint.assert_awaited_once_with(
+        21.5
+    )
+    assert hass.states.get(entity_id).state == "21.5"
+
+
+async def test_space_heating_setpoint_not_on_nordic(
+    hass: HomeAssistant,
+    entity_registry: er.EntityRegistry,
+    mock_flexit_bacnet: AsyncMock,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """Test Nordic units without space heating get no setpoint entity."""
+
+    await setup_with_selected_platforms(hass, mock_config_entry, [Platform.NUMBER])
+
+    assert not entity_registry.async_get_entity_id(
+        Platform.NUMBER, DOMAIN, "0000-0001-space_heating_setpoint"
+    )

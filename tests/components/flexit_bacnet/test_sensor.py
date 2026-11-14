@@ -45,3 +45,35 @@ async def test_extract_air_humidity_not_supported(
     assert not entity_registry.async_get_entity_id(
         Platform.SENSOR, DOMAIN, "0000-0001-extract_air_humidity"
     )
+
+
+async def test_econordic_sensors(
+    hass: HomeAssistant,
+    snapshot: SnapshotAssertion,
+    entity_registry: er.EntityRegistry,
+    mock_flexit_bacnet_econordic: AsyncMock,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """Test the hot water and heat pump sensors of an EcoNordic unit."""
+
+    await setup_with_selected_platforms(hass, mock_config_entry, [Platform.SENSOR])
+
+    await snapshot_platform(hass, entity_registry, snapshot, mock_config_entry.entry_id)
+
+
+async def test_econordic_sensors_not_on_nordic(
+    hass: HomeAssistant,
+    entity_registry: er.EntityRegistry,
+    mock_flexit_bacnet: AsyncMock,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """Test Nordic units without hot water or a heat pump get no such sensors."""
+
+    await setup_with_selected_platforms(hass, mock_config_entry, [Platform.SENSOR])
+
+    assert not entity_registry.async_get_entity_id(
+        Platform.SENSOR, DOMAIN, "0000-0001-heat_pump_state"
+    )
+    assert not entity_registry.async_get_entity_id(
+        Platform.SENSOR, DOMAIN, "0000-0001-dhw_tank_temperature_top"
+    )
