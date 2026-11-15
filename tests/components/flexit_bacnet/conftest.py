@@ -81,6 +81,9 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.dhw_state = None
         flexit_bacnet.heat_pump_state = None
         flexit_bacnet.space_heating_setpoint = None
+        flexit_bacnet.dhw_operation_mode = None
+        flexit_bacnet.dhw_temperature_setpoint_comfort = None
+        flexit_bacnet.dhw_temperature_setpoint_economy = None
 
         # Mock fan setpoints
         flexit_bacnet.fan_setpoint_extract_air_fire = 56
@@ -109,6 +112,9 @@ def mock_flexit_bacnet_econordic(mock_flexit_bacnet: AsyncMock) -> AsyncMock:
     mock_flexit_bacnet.dhw_state = 1  # Comfort
     mock_flexit_bacnet.heat_pump_state = 4  # Normal operation
     mock_flexit_bacnet.space_heating_setpoint = 22.0
+    mock_flexit_bacnet.dhw_operation_mode = 1  # Comfort
+    mock_flexit_bacnet.dhw_temperature_setpoint_comfort = 49.0
+    mock_flexit_bacnet.dhw_temperature_setpoint_economy = 45.0
     return mock_flexit_bacnet
 
 

@@ -74,6 +74,15 @@
           "off": "mdi:radiator-off"
         }
       }
+    },
+    "water_heater": {
+      "hot_water": {
+        "default": "mdi:water-boiler",
+        "state": {
+          "comfort": "mdi:thermometer-water",
+          "high_demand": "mdi:rocket-launch-outline"
+        }
+      }
     }
   }
 }
