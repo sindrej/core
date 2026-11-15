@@ -196,6 +196,16 @@
       "electric_heater": {
         "name": "Electric heater"
       }
+    },
+    "water_heater": {
+      "hot_water": {
+        "name": "Hot water",
+        "state": {
+          "comfort": "Comfort",
+          "eco": "[%key:component::water_heater::entity_component::_::state::eco%]",
+          "high_demand": "Boost"
+        }
+      }
     }
   },
   "exceptions": {
@@ -204,6 +214,9 @@
     },
     "set_hvac_mode": {
       "message": "Failed to set HVAC mode {mode}."
+    },
+    "set_operation_mode": {
+      "message": "Failed to set operation mode {mode}."
     },
     "set_preset_mode": {
       "message": "Failed to set preset mode {preset}."

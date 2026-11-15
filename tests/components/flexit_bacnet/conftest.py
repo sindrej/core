@@ -92,6 +92,9 @@ def mock_flexit_bacnet() -> Generator[AsyncMock]:
         flexit_bacnet.space_heating_flow_temperature = None
         flexit_bacnet.space_heating_return_temperature = None
         flexit_bacnet.space_heating_flow_temperature_setpoint = None
+        flexit_bacnet.dhw_operation_mode = None
+        flexit_bacnet.dhw_temperature_setpoint_comfort = None
+        flexit_bacnet.dhw_temperature_setpoint_economy = None
 
         # Mock fan setpoints
         flexit_bacnet.fan_setpoint_extract_air_fire = 56
@@ -145,6 +148,9 @@ def mock_flexit_bacnet_econordic(mock_flexit_bacnet: AsyncMock) -> AsyncMock:
     mock_flexit_bacnet.space_heating_flow_temperature = 33.3
     mock_flexit_bacnet.space_heating_return_temperature = 28.3
     mock_flexit_bacnet.space_heating_flow_temperature_setpoint = 32.4
+    mock_flexit_bacnet.dhw_operation_mode = 1  # Comfort
+    mock_flexit_bacnet.dhw_temperature_setpoint_comfort = 49.0
+    mock_flexit_bacnet.dhw_temperature_setpoint_economy = 45.0
     return mock_flexit_bacnet
 
 
